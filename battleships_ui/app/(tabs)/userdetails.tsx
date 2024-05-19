@@ -30,7 +30,6 @@ const UserDetails = () => {
     const getToken = async () => {
         try {
             const response = await AsyncStorage.getItem("@token");
-            console.log(response);
             if (response) {
                 setToken(response);
                 return response;
@@ -48,7 +47,6 @@ const UserDetails = () => {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-            console.log(response.data);
             if (response) {
                 setId(response.data.user.id);
                 setEmail(response.data.user.email);

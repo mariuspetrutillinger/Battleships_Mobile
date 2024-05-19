@@ -13,8 +13,7 @@ import {
     AccordionHeader,
     AccordionContent,
     AccordionContentText,
-    Icon,
-    set,
+    Icon
 } from '@gluestack-ui/themed';
 import { Animated } from 'react-native';
 import { useState, useRef, useEffect } from 'react';
@@ -24,9 +23,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react-native';
 import { router } from 'expo-router';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import * as Clipboard from 'expo-clipboard';
 
 interface Game {
-    id: number;
+    id: string;
     status: string;
     player1Id: string;
     player2Id: string;
@@ -81,7 +82,6 @@ const Games = () => {
         setPageSize((prevPageSize) => {
             const newSize = prevPageSize > 10 ? prevPageSize - 10 : 10;
             getAllGames(newSize);
-            console.log(`PageSize after Arrow Left: ${newSize}`);
             return newSize;
         });
     };
@@ -90,10 +90,15 @@ const Games = () => {
         setPageSize((prevPageSize) => {
             const newSize = prevPageSize + 10;
             getAllGames(newSize);
-            console.log(`PageSize after Arrow Right: ${newSize}`);
             return newSize;
         });
     };
+
+    const copyToClipboard = async (gameId: string) => {
+        await Clipboard.setStringAsync(gameId);
+
+        alert('Game ID copied to clipboard');
+    }
 
     useEffect(() => {
         Animated.spring(progress, {
@@ -151,7 +156,9 @@ const Games = () => {
                                         }
                                         return (
                                             <View key={index} width='100%' height='auto' bgColor='white' elevation={10} shadowColor='$orange500' shadowOffset={{width: 2, height: 2}} borderRadius={10} marginTop={15} justifyContent='center' padding={20}>
-                                                <Text color='black'>Game ID: {game.id}</Text>
+                                                <TouchableOpacity onPress={() => copyToClipboard(game.id)}>
+                                                    <Text color='black'>Game ID: {game.id}</Text>
+                                                </TouchableOpacity>
                                                 <Text color='black'>Game Status: {game.status}</Text>
                                                 <Accordion>
                                                     <AccordionItem value='a'>

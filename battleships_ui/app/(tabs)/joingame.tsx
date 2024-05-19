@@ -19,6 +19,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Animated } from "react-native";
 import { useToast } from "@gluestack-ui/themed";
 import BackButton from "@/components/navigation/BackButton";
+import { router } from "expo-router";
 
 interface JoinGame {
     id: string;
@@ -40,7 +41,6 @@ const JoinGame = () => {
     const getToken = async () => {
         try {
             const response = await AsyncStorage.getItem("@token");
-            console.log(response);
             if (response) {
                 setToken(response);
                 return response;
@@ -52,8 +52,6 @@ const JoinGame = () => {
 
     const joinGame = async () => {
         const accessToken = await getToken();
-        console.log(accessToken);
-        console.log(joinId);
         try {
             const response = await fetch(`http://163.172.177.98:8081/game/join/${joinId}`, {
                 method: 'POST',
@@ -62,8 +60,26 @@ const JoinGame = () => {
                 },
             });
             const data = await response.json();
-            console.log(data);
-            if (response) {
+            if (data.code === 401) {
+                toast.show({
+                    placement: "bottom left",
+                    render: ({ id }) => {
+                        const toastId = "toast-" + id
+                        return (
+                            <SafeAreaView>
+                                <Toast nativeID={toastId} action="attention" variant="solid">
+                                    <VStack space="xs">
+                                        <ToastTitle>Game is full</ToastTitle>
+                                    <ToastDescription>
+                                        The game you are trying to join is full.
+                                    </ToastDescription>
+                                    </VStack>
+                                </Toast>
+                            </SafeAreaView>
+                        )
+                    },
+                });
+            } else {
                 setGame(data);
                 toast.show({
                     placement: "bottom left",
@@ -86,6 +102,24 @@ const JoinGame = () => {
             }
         } catch (error) {
             console.error(error);
+            toast.show({
+                placement: "bottom left",
+                render: ({ id }) => {
+                    const toastId = "toast-" + id
+                    return (
+                        <SafeAreaView>
+                            <Toast nativeID={toastId} action="attention" variant="solid">
+                                <VStack space="xs">
+                                    <ToastTitle>Game join unsuccesful</ToastTitle>
+                                <ToastDescription>
+                                    Your game can't be joined.
+                                </ToastDescription>
+                                </VStack>
+                            </Toast>
+                        </SafeAreaView>
+                    )
+                },
+            });
         }
     }
 
@@ -136,6 +170,9 @@ const JoinGame = () => {
                     <Text>Joined game ID: {game?.id}</Text>
                     <Text>Player 1: {game?.player1Id}</Text>
                     <Text>Player 2: {game?.player2Id}</Text>
+                    <Button bgColor='$orange500' marginTop='10%' width='auto' height='auto' padding={10} borderRadius={15} isDisabled={game?.id ? false : true} onPress={() => router.push('/joingameboard')}>
+                        <Text fontSize={20} color='black'>Go to board</Text>
+                    </Button>
                 </Center>
             </Animated.View>
         </>

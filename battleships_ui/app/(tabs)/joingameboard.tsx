@@ -150,6 +150,9 @@ const GameBoard = () => {
                     body: JSON.stringify({ ships })
                 });
             const data = await response.json();
+            if (data.code === 400) {
+                alert(data.message);
+            }
             console.log(data);
         }
         catch (error) {
